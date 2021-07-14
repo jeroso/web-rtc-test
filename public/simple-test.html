@@ -1,0 +1,288 @@
+<!--
+// Muaz Khan         - www.MuazKhan.com
+// MIT License       - www.WebRTC-Experiment.com/licence
+// Experiments       - github.com/muaz-khan/WebRTC-Experiment
+-->
+
+<html lang="en">
+    <head>
+        <title>코리아유니크베뉴 프리젠테이션모드</title>
+        <meta name="description" content="MultiRTC is a WebRTC skype-like application that allows all features as skype provides E.g. text conversation, file sharing, enable/disable screen, enable/disable webcam or microphone etc. It provides additional features like auto-text translation in about 41 languages. It also provides customization of each feature so that you can set each value yourself e.g. chunk-size, intervals, etc." />
+        <meta name="keywords" content="MultiRTC,RTCMultiConnection,WebRTC,Demos,Experiments,Muaz Khan,WebRTC and Skype,Skype like Demo" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
+        <meta name="author" content="Muaz Khan">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        
+        <!-- ui-stylesheet -->
+        <!-- <link href="style.css" rel="stylesheet">
+        <link href="scrol-bars.css" rel="stylesheet"> -->
+        
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+        <style>
+            .vr-contents{
+                height: 100vh;
+            }
+            .controller{
+                position:absolute; 
+                top:25vh; 
+                left:0px; 
+                width:20vw;
+                color: white;
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+            .user-list{
+                position: absolute;                
+                top:25vh;
+                right:0;
+                border:1px;
+                color: white;
+                background-color: rgba(0, 0, 0, 0.5);
+                
+            }
+            .share-addr{
+                position: absolute;      
+                width: 100%;          
+                top:0;
+                color: white;
+                background-color: rgba(0, 0, 0, 0.5);
+                
+            }
+            .log-area{
+                position: absolute;      
+                width: 100%;          
+                bottom:0;
+                height:30vh;
+                color: white;
+                background-color: rgba(0, 0, 0, 0.5);
+                overflow: auto; 
+                
+            }
+            .boldwhite{
+                font-weight: 700;
+                color:white;
+                margin-top: 10px;
+            }
+        </style>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+
+        <script src="lucid-web-vr/lucid-vr360-core.js"></script>
+        <script src="pano-player.js"></script>
+        <!-- www.RTCMultiConnection.org/changes-log/ -->
+        <script src="RTCMultiConnection.js"> </script>
+        <script src="FileBufferReader.js"> </script>
+		<script src="firebase.js"> </script>
+        <script src="linkify.js"> </script>
+    </head>
+    <body onload="javascript:bodyReady()" scroll="no">
+        <div class="log-area" id="log-area-view">
+            <button class="btn btn-outline-light my-3 btn-sm " id="hide-log">닫기</button>
+            <div class="container" id="log-area">
+                <!-- Content here -->
+            </div>
+        </div>
+        <div class="user-list col-3" id="user-list">
+            <div class="my-2 text-center"><b>접속된 사용자 목록</b></div>
+        </div>
+        <div class="share-addr">
+            <div class="my-2 text-center"><b>함께 코리아유니크베뉴를 둘려볼 사용자에게 아래의 표시되는 주소를 복사하여 공유하세요 </b></div>
+            <div class="row my-2" style="margin: 0px;">
+                <div class="col-3"></div>
+                <div class="col-5 input-group-sm">
+                    <input type="text" class="form-control" id="share-addr" placeholder="시작 준비 중..."/>
+                    
+                </div>
+                <div class="col-2"> <button class="btn-sm btn-primary" type="button" id="copy-addr" data-clipboard-target="#share-addr">주소복사</button></div>
+                <div class="col-2"></div>
+            </div>
+        </div>
+        <div style="display: none;">
+            <input type="text" class="form-control" id="room-name">
+            <input type="text" class="form-control" id="your-name" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="button-addon2">
+                            <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" id="continue">JOIN ROOM</button>
+                            </div>
+        </div>
+        <div class="controller">  
+            <div class="my-2 text-center"><b>⚙ 제어기능</b></div>
+            <div class="container px-2 py-2">
+                <button class="btn btn-outline-light my-2 btn-sm btn-block" id="select-scene-1">장소 변경</button>
+                <button class="btn btn-outline-light my-2 btn-sm btn-block" id="select-get-look-at">내가 보는 곳 같이보기</button>
+                <button class="btn btn-outline-light my-2 btn-sm btn-block" id="add-hotspot">내가 보는 곳 강조</button>
+                <button class="btn btn-outline-light my-3 btn-sm btn-block" id="show-log">로그보기</button>
+            </div>          
+            
+        </div>
+        <div class="vr-contents">
+            <iframe id="vr360_player_area"
+                    scrolling="no"
+                    style="height:100vh; background-position:center 0; background-size:cover; width:100vw;"
+                    src="https://dev-test.ldfactory.com/index.php/uniquebureau"
+                    allowfullscreen="true" allow="autoplay; fullscreen" frameBorder="0"></iframe>
+        </div>
+
+        <div class="modal fade" id="selectScene" role="dialog" aria-labelledby="selectScene" aria-hidden="true">
+            <div class="modal-dialog" style="margin-left:15%; margin-top:2%; " role="document">
+                <div class="modal-content" style="background-color: rgba(0,0,0,0.5); color:white;">
+                <table>
+                    <tr><td class="boldwhite">남이섬</td></tr>
+                    <tr>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/NAM/thumbnail/01-Metasequoia.jpg" onclick="javascript:changeScene(1);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/NAM/thumbnail/02-Empty_Road.jpg" onclick="javascript:changeScene(2);" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/NAM/thumbnail/03-Paddy_Field.jpg" onclick="javascript:changeScene(3);" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/NAM/thumbnail/04-Okhwa.jpg" onclick="javascript:changeScene(4);" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/NAM/thumbnail/05-Angel_Tower.jpg" onclick="javascript:changeScene(5);" class="margininner"/></td>
+                    </tr>
+                    <tr>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/NAM/thumbnail/06-Nami_Island.jpg" onclick="javascript:changeScene(6);" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/NAM/thumbnail/07-Nami_Poongwon.jpg" onclick="javascript:changeScene(7);" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/NAM/thumbnail/08-Song_Museum.jpg" onclick="javascript:changeScene(8);" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/NAM/thumbnail/09-Jeonggwanru_Entrance.jpg" onclick="javascript:changeScene(9);" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/NAM/thumbnail/10-Jeonggwanru_Lobby.jpg" onclick="javascript:changeScene(10);" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/NAM/thumbnail/11-Happy_Museum.jpg" onclick="javascript:changeScene(11);" class="margininner"/></td>
+                    </tr>
+                    <tr><td class="boldwhite">민속촌</td></tr>
+                    <tr>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/MIN/thumbnail/01-Entrance.jpg" onclick="javascript:changeScene(12);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/MIN/thumbnail/02-Southern District Master.jpg" onclick="javascript:changeScene(13);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/MIN/thumbnail/03-Dyeing cloth street.jpg" onclick="javascript:changeScene(14);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/MIN/thumbnail/04-Wanhyangru.jpg" onclick="javascript:changeScene(15);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/MIN/thumbnail/05-concert hall.jpg" onclick="javascript:changeScene(16);" id="thumbnail" class="margininner"/></td>
+                    </tr>
+                    <tr>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/MIN/thumbnail/06-A separate party.jpg" onclick="javascript:changeScene(17);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/MIN/thumbnail/07.jpg" onclick="javascript:changeScene(18);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/MIN/thumbnail/08-Hongye Bridge.jpg" onclick="javascript:changeScene(19);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/MIN/thumbnail/09-Pumpkin Vine.jpg" onclick="javascript:changeScene(20);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/MIN/thumbnail/10-Guan.jpg" onclick="javascript:changeScene(21);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/MIN/thumbnail/11-Pyeongseok Bridge.jpg" onclick="javascript:changeScene(22);" id="thumbnail" class="margininner"/></td>
+                    </tr>
+                    <tr><td class="boldwhite">플로팅 아일랜드</td></tr>
+                    <tr>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/FLO/thumbnail/01-Bridge daytime.jpg" onclick="javascript:changeScene(23);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/FLO/thumbnail/02-Billadnoche.jpg" onclick="javascript:changeScene(24);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/FLO/thumbnail/03-Vista Pub Counter.jpg" onclick="javascript:changeScene(25);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/FLO/thumbnail/04-Vista Pub.jpg" onclick="javascript:changeScene(26);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/FLO/thumbnail/05-Rib notice.jpg" onclick="javascript:changeScene(27);" id="thumbnail" class="margininner"/></td>
+                    </tr>
+                    <tr>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/FLO/thumbnail/06-Convention Hall.jpg" onclick="javascript:changeScene(28);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/FLO/thumbnail/07-Entrance.jpg" onclick="javascript:changeScene(29);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/FLO/thumbnail/08-Bridge night view01.jpg" onclick="javascript:changeScene(30);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/FLO/thumbnail/09-Bridge night view02.jpg" onclick="javascript:changeScene(31);" id="thumbnail" class="margininner"/></td>
+                        <td><img src="https://dev-test.ldfactory.com/ar-photo-zone/uniquebureau/FLO/thumbnail/10-Love night scene.jpg" onclick="javascript:changeScene(32);" id="thumbnail" class="margininner"/></td>
+                    </tr>
+                </table>
+                    <button class="btn btn-outline-light btn-sm"  onclick="javascript:closeModal();" style="margin:10px;">닫기</button>
+                </div>
+                
+            </div>
+        </div>
+       
+        <!-- User Interface -->
+        
+        <script src="ui.main.simple.js"> </script>
+        <script src="ui.peer-connection.js"> </script>
+        <!-- <script src="ui.share-files.js"> </script>
+        <script src="ui.users-list.js"> </script>
+        <script src="ui.settings.js"> </script> -->
+        <script>
+            $('#select-scene-1').click(function(){
+                // $('#vr360_player_area').attr('src', 'https://k-mice.visitkorea.or.kr/vr/scenes/1573.kto?lang=ko');
+                // rtcMultiConnection.send('scene1');
+                // console.log('send msg');
+                // var iframe = document.getElementById('vr360_player_area').contentWindow; 
+                // iframe.postMessage({ parentData : 'scene1'},'*');
+
+                // rtcMultiConnection.send('scene1');
+                showModal();
+                
+            });
+            function changeScene(_sceneId){
+                // $('#vr360_player_area').attr('src', 'https://k-mice.visitkorea.or.kr/vr/scenes/330.kto?lang=ko');
+                
+                var iframe = document.getElementById('vr360_player_area').contentWindow; 
+                iframe.postMessage({ parentData : 'changeScene', sceneId:_sceneId},'*');
+                rtcMultiConnection.send('changeScene,'+_sceneId);
+                closeModal();
+            }
+
+            $('#select-look-at').click(function(){
+                var iframe = document.getElementById('vr360_player_area').contentWindow; 
+                iframe.postMessage({ parentData : 'lookAt' , hDeg: 180, vDeg: 0 , imm: false},'*');
+
+                rtcMultiConnection.send('lookAt');
+            });
+
+            $('#select-get-look-at').click(function(){
+                var iframe = document.getElementById('vr360_player_area').contentWindow; 
+                iframe.postMessage({ parentData : 'getLookAt'},'*');       
+                
+                
+            });
+
+            $('#add-hotspot').click(function(){
+                var iframe = document.getElementById('vr360_player_area').contentWindow; 
+                iframe.postMessage({ parentData : 'getHighLightLookAt'},'*');                     
+            });
+
+            $('#remove-hotspot').click(function(){
+                var iframe = document.getElementById('vr360_player_area').contentWindow; 
+                iframe.postMessage({ parentData : 'removeHotspot'},'*');                
+            });
+
+            $('#show-log').click(function(){
+                $('#log-area-view').show();
+            });
+            $('#hide-log').click(function(){
+                $('#log-area-view').hide();
+            });
+            function bodyReady(){
+
+                new ClipboardJS('.btn-sm');
+
+                console.log($.urlParam('mode')); //edit
+                // if($.urlParam('mode') === 'ctrl'){}
+                // else{
+                //     $("#select-scene-1").css("display", "none");
+                //     $("#select-scene-2").css("display", "none");
+                // }
+                
+                joinroom('host');
+                $('#log-area-view').hide();
+            }
+
+            window.addEventListener('message',function(e){
+                console.log(e);
+                if(e.data.method === 'getLookAt'){
+                    rtcMultiConnection.send('getLookAt||' + JSON.stringify(e.data.currentLookAt));
+                }
+                if(e.data.method === 'getHighLightLookAt'){
+                    var lookAtDeg = e.data.currentLookAt;
+                    var iframe = document.getElementById('vr360_player_area').contentWindow; 
+                    iframe.postMessage({ parentData : 'hostHighLight' , hDeg: lookAtDeg.horizontalDegree, vDeg: lookAtDeg.verticalDegree , imm: false},'*');
+                    rtcMultiConnection.send('hostHighLight||' + JSON.stringify(e.data.currentLookAt));
+                }
+                console.log(e.data.currentLookAt);
+                
+            });
+
+            function showModal(){
+                $('#selectScene').modal('show');
+            }
+
+            function closeModal(){
+                $('#selectScene').modal('hide');
+                
+            }
+                    
+        </script>
+    </body>
+</html>

@@ -1,0 +1,254 @@
+<html lang="en">
+    <head>
+        <title>Narration Demo</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+        
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.0/howler.min.js"></script>
+        <script src="lucid-web-vr/lucid-vr360-core.js"></script>
+        <script src="pano-player.js"></script>
+        <!-- www.RTCMultiConnection.org/changes-log/ -->
+        
+        <style>
+            .vr-contents{
+                height: 100vh;
+            }
+            .controller{
+                position:absolute; top:0px; left:0px; width:100%;
+            }
+
+            #myProgress {
+                width: 100%;
+                height: 10px;
+                background-color: #ddd;
+                opacity: 0.5;
+            }
+
+            #myBar {
+                width: 0%;
+                height: 10px;
+                background-color: blue;
+                opacity: 0.5;
+            }
+            .enter-name{
+                position:absolute; 
+                top:0px; 
+                left:0px; 
+                width: 100vw;
+                height: 100vh;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 100;
+                color: white;
+                vertical-align: middle;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body onload="javascript:bodyReady()" scroll="no">
+        <div class="enter-name" id="enter-name">
+            <div style="width:100%; margin-top: 25vh; margin-left: 0px; margin-right: 0px; margin-bottom: 0px;">
+               
+                <img src="/images/play_arrow-white-48dp.svg" alt="play" height="300" width="300" id="start-play">
+                <div style="font-size:xx-large;font-weight: 700;">인터렉티브 나래이션 데모 시작</div>
+            </div>
+        </div>
+        <div class="controller">
+            <div id="myProgress">
+                <div id="myBar"></div>
+            </div>
+            <div>
+                <!-- <button class="btn btn-primary" id="start-play">Start</button> -->
+            </div>
+           
+            
+        </div>
+        <div class="vr-contents">
+            <iframe id="vr360_player_area"
+                    scrolling="no"
+                    style="height:100vh; background-position:center 0; background-size:cover; width:100vw;"
+                    src="https://dev-test.ldfactory.com/index.php/uniquebureau?init=33"
+                    allowfullscreen="true" allow="autoplay; fullscreen" frameBorder="0"></iframe>
+        </div>
+        <script>
+            var sound;
+            var soundTimer;
+            var iframe;
+            var event1Flag = true;
+            var event2Flag = true;
+            var event3Flag = true;
+            var hotspotInit1={
+                    id:'hotspotid1',
+                    url:'/public/demo/coex_air.png',
+                    
+                    width:1080,
+                    height:720,
+                    hDeg:180.0,
+                    vDeg:0.0,
+                };
+
+            var hotspotInit3={
+                    id:'hotspotid3',
+                    url:'/public/demo/coex-c-fest.jpg',
+                    
+                    width:720,
+                    height:480,
+                    hDeg:0.0,
+                    vDeg:0.0,
+                };
+
+            var hotspotInit2={
+                    id:'hotspotid2',
+                    url:'/public/demo/coex_night.jpg',
+                    
+                    width:720,
+                    height:480,
+                    hDeg:0.0,
+                    vDeg:0.0,
+                };
+
+            var eventList=[
+                { 
+                    eventTime:9 ,
+                    flag : true,
+                    event : function(){
+                        viewInitHotspot();
+                    }
+                },
+                { 
+                    eventTime:15,
+                    flag : true,
+                    event : function(){
+                        iframe.postMessage({ parentData : 'addHotspotParent',hotspot:hotspotInit3c},'*');
+                    }
+                },
+                { 
+                    eventTime:29,
+                    flag : true,
+                    event : function(){
+                        iframe.postMessage({ parentData : 'lookAt' , hDeg: 180, vDeg: 0 , imm: false},'*');
+                    }
+                },
+                { 
+                    eventTime:58,
+                    flag : true,
+                    event : function(){
+                        removeInitHotspot();
+                        iframe.postMessage({ parentData : 'toggleSpaceLayer'},'*');    
+                        iframe.postMessage({ parentData : 'startAutoRotation' , hDeg: 180, vDeg: 0 , imm: false},'*');
+                    }
+                },
+                { 
+                    eventTime:83,
+                    flag : true,
+                    event : function(){
+                        // iframe.postMessage({ parentData : 'stopAutoRotation' , hDeg: 180, vDeg: 0 , imm: false},'*');
+                        iframe.postMessage({ parentData : 'changeScene', sceneId:34},'*');
+                        
+                    }
+                },
+                { 
+                    eventTime:98,
+                    flag : true,
+                    event : function(){
+                        // iframe.postMessage({ parentData : 'stopAutoRotation' , hDeg: 180, vDeg: 0 , imm: false},'*');
+                        iframe.postMessage({ parentData : 'changeScene', sceneId:33},'*');
+                        iframe.postMessage({ parentData : 'stopAutoRotation'},'*');
+                        iframe.postMessage({ parentData : 'lookAt' , hDeg: 0, vDeg: 0 , imm: false},'*');
+                        iframe.postMessage({ parentData : 'toggleSpaceLayer'},'*'); 
+                        iframe.postMessage({ parentData : 'toggleSafetyLayer'},'*'); 
+                        
+                    }
+                },
+                { 
+                    eventTime:109,
+                    flag : true,
+                    event : function(){
+                        iframe.postMessage({ parentData : 'lookAt' , hDeg: 180, vDeg: 0 , imm: false},'*');
+                        iframe.postMessage({ parentData : 'startAutoRotation'},'*');
+                        iframe.postMessage({ parentData : 'toggleSafetyLayer'},'*'); 
+                        // iframe.postMessage({ parentData : 'stopAutoRotation' , hDeg: 180, vDeg: 0 , imm: false},'*');
+                        
+                    }
+                }
+               
+            ]
+            
+
+            function viewInitHotspot(){
+                
+                var iframe = document.getElementById('vr360_player_area').contentWindow; 
+                iframe.postMessage({ parentData : 'addHotspotParent',hotspot:hotspotInit1},'*');
+                iframe.postMessage({ parentData : 'addHotspotParent',hotspot:hotspotInit2},'*');
+            }
+
+            function removeInitHotspot(){
+                var iframe = document.getElementById('vr360_player_area').contentWindow; 
+                iframe.postMessage({ parentData : 'removeHotspotParent',hotspot:hotspotInit1},'*');
+                iframe.postMessage({ parentData : 'removeHotspotParent',hotspot:hotspotInit2},'*');
+                iframe.postMessage({ parentData : 'removeHotspotParent',hotspot:hotspotInit3},'*');
+            }
+
+            $('#start-play').click(function(){
+                $('#enter-name').hide();
+                
+                sound.play();
+
+                   
+
+                soundTimer = setInterval(procTimer, 20);
+            });
+
+            function procTimer(){
+                // console.log(sound.seek());
+                var elem = document.getElementById("myBar");
+                var width = sound.seek()/sound.duration() *100.0;
+                elem.style.width = width + "%";
+                eventList.forEach(_event => {
+                    if(sound.seek() > _event.eventTime && _event.flag){
+                        _event.event();
+                        _event.flag = false;
+                    }
+                    
+                });
+            }
+            
+            function bodyReady(){
+                iframe = document.getElementById('vr360_player_area').contentWindow; 
+                sound = new Howl({
+                    src: ['/sound/narration.mp3'],
+                    autoplay: false,
+                    loop: true,
+                    volume: 1.0,
+                    // onend: function() {
+                    //     console.log('Finished!');
+                    // },
+                    // onplay: function(){
+                    //     console.log(sound.seek());
+                    // },
+                    // onseek: function(){
+                    //     console.log(sound.seek());
+                    // }
+                });
+
+                
+            }
+
+            window.addEventListener('message',function(e){
+                console.log(e.data.currentLookAt);
+                rtcMultiConnection.send('getLookAt||' + JSON.stringify(e.data.currentLookAt));
+            });
+
+            
+        </script>
+    </body>
+</html>
